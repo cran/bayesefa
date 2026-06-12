@@ -6,6 +6,25 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
+// update_intercept_EFA
+void update_intercept_EFA(unsigned int n, arma::vec& intercept, const arma::vec& xbar, const arma::mat& Lambda, const arma::vec& psis_inv);
+RcppExport SEXP _bayesefa_update_intercept_EFA(SEXP nSEXP, SEXP interceptSEXP, SEXP xbarSEXP, SEXP LambdaSEXP, SEXP psis_invSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< unsigned int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type intercept(interceptSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type xbar(xbarSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Lambda(LambdaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type psis_inv(psis_invSEXP);
+    update_intercept_EFA(n, intercept, xbar, Lambda, psis_inv);
+    return R_NilValue;
+END_RCPP
+}
 // update_uniquenesses
 void update_uniquenesses(const arma::mat& Y, arma::mat& F, arma::mat& Lambda, arma::vec& psis_inv);
 RcppExport SEXP _bayesefa_update_uniquenesses(SEXP YSEXP, SEXP FSEXP, SEXP LambdaSEXP, SEXP psis_invSEXP) {
@@ -353,6 +372,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_bayesefa_update_intercept_EFA", (DL_FUNC) &_bayesefa_update_intercept_EFA, 5},
     {"_bayesefa_update_uniquenesses", (DL_FUNC) &_bayesefa_update_uniquenesses, 4},
     {"_bayesefa_EFA_Mode_Jumper", (DL_FUNC) &_bayesefa_EFA_Mode_Jumper, 5},
     {"_bayesefa_rTruncNorm_bounds", (DL_FUNC) &_bayesefa_rTruncNorm_bounds, 4},

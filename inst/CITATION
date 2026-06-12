@@ -1,0 +1,14 @@
+citHeader("To cite bayesefa in publications use:")
+
+bibentry(
+  bibtype = "Article",
+  title   = "Bayesian Exploratory Factor Analysis of Continuous, Mixed-Type, and Bounded Continuous Variables with a Mode-Jumping Algorithm",
+  author  = c(person("Albert X.", "Man"), person("Steven A.", "Culpepper")),
+  journal = "Journal of the American Statistical Association",
+  year    = "2020",
+  volume  = "115",
+  number  = "531",
+  pages   = "1490-1502",
+  doi     = "10.1080/01621459.2020.1773833",
+  textVersion = "Man, A. X., & Culpepper, S. A. (2020). Bayesian Exploratory Factor Analysis of Continuous, Mixed-Type, and Bounded Continuous Variables with a Mode-Jumping Algorithm. Journal of the American Statistical Association, 115(531), 1490-1502."
+)

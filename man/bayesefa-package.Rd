@@ -2,11 +2,11 @@
 % Please edit documentation in R/bayesefa-internal.R
 \docType{package}
 \name{bayesefa-package}
+\alias{bayesefa}
 \alias{bayesefa-package}
-\alias{_PACKAGE}
 \title{bayesefa: Bayesian Exploratory Factor}
 \description{
-Exploratory Bayesian factor analysis of continuous, mixed-type, and bounded continuous variables using the mode-jumping algorithm of Man and Culpepper (2020) <doi:10.1080/01621459.2020.1773833>.
+Exploratory Bayesian factor analysis of continuous, mixed-type, and bounded continuous variables using the mode-jumping algorithm of Man and Culpepper (2020) \doi{10.1080/01621459.2020.1773833}.
 }
 \references{
 Man, A. & Culpepper, S. A. (2020). A mode-jumping algorithm for Bayesian factor analysis. Journal of the American Statistical Association, doi:10.1080/01621459.2020.1773833.
@@ -16,6 +16,7 @@ Man, A. & Culpepper, S. A. (2020). A mode-jumping algorithm for Bayesian factor 
 
 Authors:
 \itemize{
+  \item Steven Andrew Culpepper \email{sculpepp@illinois.edu} (\href{https://orcid.org/0000-0003-4226-6176}{ORCID})
   \item Albert Man \email{aman3@illinois.edu}
 }
 

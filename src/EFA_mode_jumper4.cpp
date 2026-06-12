@@ -1,6 +1,29 @@
 #include <RcppArmadillo.h>
-#include <commonEFAfunctions.h>
+#include "commonEFAfunctions.h"
 
+//unique function to EFA; uses a flat prior for mu
+//' @title Sample Intercept Parameters using a flat prior
+//' @description Sample intercept parameters from the posterior distribution.
+//' @param n An integer specifying the sample size.
+//' @param intercept A J vector of variable intercepts.
+//' @param xbar A vector of variable means.
+//' @param Lambda A J by M matrix of loadings.
+//' @param psis_inv A J vector of inverse-uniquenesses.
+//' @author Steve Culpepper
+//' 
+//' @noRd
+// [[Rcpp::export]]
+void update_intercept_EFA(unsigned int n,
+                      arma::vec& intercept,
+                      const arma::vec& xbar,
+                      const arma::mat& Lambda,
+                      const arma::vec& psis_inv) {
+  
+  arma::mat Sig = Lambda*Lambda.t()+arma::diagmat(1./psis_inv);
+  arma::mat Sig_intercept = Sig/n;
+  arma::rowvec intercept_tmp = rmvnorm(1,xbar,Sig_intercept);  
+  intercept = intercept_tmp.t();  
+}
 
 
 //unique to EFA code
@@ -110,15 +133,20 @@ Rcpp::List EFA_Mode_Jumper(const arma::mat& Y,
   unsigned int chain_m_burn = chain_length-burnin;
   unsigned int tmburn;
   arma::mat I_K = arma::eye(M,M);
+  arma::vec ybar = (arma::mean(Y)).t();
   
   //Saving output
   arma::cube LAMBDA(J,M,chain_m_burn);
+  arma::mat INTERCEPTs(J,chain_m_burn);
   arma::cube F_OUT(N,M,chain_m_burn);
   arma::mat PSIs(J,chain_m_burn);
   arma::umat ROW_OUT(M, chain_m_burn);
   // arma::mat MH_PROBS(4, chain_m_burn);
   arma::vec ACCEPTED(chain_m_burn);
   arma::vec LIKELIHOOD(chain_m_burn);
+ 
+  //initialize intercept at the sample mean
+  arma::vec intercept = ybar;
   
   // Initialize r_idx as PLT 
   arma::uvec r_idx;
@@ -163,12 +191,15 @@ Rcpp::List EFA_Mode_Jumper(const arma::mat& Y,
   for(unsigned int t = 0; t < chain_length; ++t){
     
     accepted = 0; 
-    update_Lambda_loadings_hard_zero(Y, r_idx, F, Lambda, psis_inv, invClam, my_gamma);
-    update_F_matrix(Y,I_K, F, Lambda, psis_inv);
+    update_intercept_EFA(N,intercept,ybar,Lambda,psis_inv);
+    arma::mat Y_centered = Y - repmat(intercept, 1, N).t();
+    
+    update_Lambda_loadings_hard_zero(Y_centered, r_idx, F, Lambda, psis_inv, invClam, my_gamma);
+    update_F_matrix(Y_centered,I_K, F, Lambda, psis_inv);
     update_invClam(Lambda, invClam);
-    update_uniquenesses(Y, F, Lambda, psis_inv);
+    update_uniquenesses(Y_centered, F, Lambda, psis_inv);
     //perform mode jump step
-    L = mode_jump(Y, Lambda, F, invClam, pow(psis_inv, -0.5), r_idx, my_gamma);
+    L = mode_jump(Y_centered, Lambda, F, invClam, pow(psis_inv, -0.5), r_idx, my_gamma);
     arma::mat temp = L["lambda"];
     Lambda = temp;
     arma::uvec temp2 = L["r_idx"];
@@ -186,6 +217,7 @@ Rcpp::List EFA_Mode_Jumper(const arma::mat& Y,
       ACCEPTED(tmburn) = accepted;
       LAMBDA.slice(tmburn) = Lambda;
       F_OUT.slice(tmburn) = F;
+      INTERCEPTs.col(tmburn) = intercept;
       PSIs.col(tmburn) = 1./psis_inv;
       ROW_OUT.col(tmburn) = r_idx;
       // LIKELIHOOD(tmburn) = marginal_like;
@@ -194,6 +226,7 @@ Rcpp::List EFA_Mode_Jumper(const arma::mat& Y,
   }
   
   return Rcpp::List::create(Rcpp::Named("LAMBDA",LAMBDA),
+                            Rcpp::Named("INTERCEPTs",INTERCEPTs),
                             Rcpp::Named("PSIs",PSIs),
                             Rcpp::Named("ROW_OUT", ROW_OUT),
                             Rcpp::Named("F_OUT", F_OUT),

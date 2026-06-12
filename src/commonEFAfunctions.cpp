@@ -250,7 +250,8 @@ void update_invClam(const arma::mat& Lambda,
 // [[Rcpp::export]]
 arma::uvec my_setdiff(arma::uvec& x, const arma::uvec& y){
   for (size_t j = 0; j < y.n_elem; j++) {
-    arma::uword q1 = arma::conv_to<arma::uword>::from(arma::find(x == y(j)));
+    // arma::uword q1 = arma::conv_to<arma::uword>::from(arma::find(x == y(j)));
+    arma::uword q1 = arma::as_scalar(arma::find(x == y(j)));
     x.shed_row(q1);
   }
   return x;
@@ -296,7 +297,7 @@ void update_Lambda_loadings_hard_zero(const arma::mat& Y,
     arma::vec m_1toj = psis_inv(j)*C_1toj*FpYj;
     double lambdajj=sim_gamma_type(Lambda(j,m),my_gamma+1.0,m_1toj(m),2.*C_1toj(m,m));
     
-    if (!arma::is_finite(lambdajj)) {
+    if (!std::isfinite(lambdajj)) {
       lambdajj = 0;
     }
     // update lambdaj conditioned upon lambdajj
